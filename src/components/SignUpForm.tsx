@@ -15,11 +15,13 @@ export default function SignUpForm() {
     register,
     handleSubmit,
     formState: { errors },
+    reset
   } = useForm<SignUpFormData>({
     shouldFocusError: true,
   });
 
   const onSubmit = (data: SignUpFormData) => {
+    reset()
     console.log(data);
   };
 
