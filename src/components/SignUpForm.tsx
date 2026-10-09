@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
+import FormField from "./FormField";
 
 interface SignUpFormData {
   name: string;
@@ -14,7 +15,9 @@ export default function SignUpForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpFormData>();
+  } = useForm<SignUpFormData>({
+    shouldFocusError: true,
+  });
 
   const onSubmit = (data: SignUpFormData) => {
     console.log(data);
@@ -48,10 +51,7 @@ export default function SignUpForm() {
 
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             {/* name */}
-            <div>
-              <label className="block text-sm text-slate-300 mb-1.5">
-                Full name
-              </label>
+            <FormField label="Fullname" error={errors.name?.message}>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                 <input
@@ -71,15 +71,10 @@ export default function SignUpForm() {
                   className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-slate-100 placeholder:text-slate-600 text-sm outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                 />
               </div>
-              {errors.name && (
-                <p className="text-red-600">{errors.name.message}</p>
-              )}
-            </div>
+            </FormField>
+
             {/* email */}
-            <div>
-              <label className="block text-sm text-slate-300 mb-1.5">
-                Email
-              </label>
+            <FormField label="email" error={errors.email?.message}>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                 <input
@@ -95,16 +90,10 @@ export default function SignUpForm() {
                   className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-slate-100 placeholder:text-slate-600 text-sm outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                 />
               </div>
-              {errors.email && (
-                <p className="text-red-600">{errors.email.message}</p>
-              )}
-            </div>
+            </FormField>
 
             {/* password */}
-            <div>
-              <label className="block text-sm text-slate-300 mb-1.5">
-                Password
-              </label>
+            <FormField label="password" error={errors.password?.message}>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                 <input
@@ -131,10 +120,7 @@ export default function SignUpForm() {
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-600">{errors.password.message}</p>
-              )}
-            </div>
+            </FormField>
             <button
               type="submit"
               className="w-full mt-2 bg-linear-to-r from-rose-400 to-amber-300 text-slate-900 font-semibold text-sm rounded-xl py-3 flex items-center justify-center gap-2 transition hover:brightness-105 active:scale-[0.98]"
