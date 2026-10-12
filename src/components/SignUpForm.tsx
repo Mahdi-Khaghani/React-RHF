@@ -20,6 +20,7 @@ interface UserProfileFormData {
   age: number;
   country: string;
   gender: string;
+  maritalStatus: string;
   skills: string[];
   biography: string;
   terms: boolean;
@@ -40,6 +41,7 @@ export default function UserProfileForm() {
   };
 
   const terms = watch("terms");
+  const maritalStatus = watch("gender");
 
   return (
     <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-6">
@@ -210,6 +212,36 @@ export default function UserProfileForm() {
                 </label>
               </div>
             </FormField>
+            {maritalStatus === "male" ? (
+              <FormField
+                label="maritalStatus"
+                error={errors.maritalStatus?.message}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="radio"
+                      value="married"
+                      {...register("maritalStatus", {
+                        required: "Please select a maritalStatus.",
+                      })}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">Married</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="radio"
+                      value="single"
+                      {...register("maritalStatus")}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">single</span>
+                  </label>
+                </div>
+              </FormField>
+            ) : null}
 
             {/* Skills */}
             <FormField label="Skills" error={errors.skills?.message}>
