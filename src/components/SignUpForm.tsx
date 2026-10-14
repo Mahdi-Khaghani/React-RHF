@@ -10,7 +10,7 @@ import {
   FileText,
   ArrowRight,
 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import FormField from "./FormField";
 
 interface UserProfileFormData {
@@ -24,6 +24,9 @@ interface UserProfileFormData {
   skills: string[];
   biography: string;
   terms: boolean;
+  phoneNumbers: {
+    number: string;
+  }[];
 }
 
 export default function UserProfileForm() {
@@ -34,7 +37,18 @@ export default function UserProfileForm() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<UserProfileFormData>();
+    control,
+  } = useForm<UserProfileFormData>({
+    defaultValues: { phoneNumbers: [{ number: "" }] },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "phoneNumbers",
+    rules: {
+      required: "At least one phone number is required",
+    },
+  });
 
   const onSubmit = (data: UserProfileFormData) => {
     console.log(data);
@@ -74,13 +88,20 @@ export default function UserProfileForm() {
             <FormField label="Full Name" error={errors.name?.message}>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="text"
-                  {...register("name", {
-                    required: "Name is required",
-                  })}
-                  placeholder="John Doe"
-                  className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({field}) => (
+                    <input
+                      type="text"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e.target.value.toUpperCase())
+                      }}
+                      placeholder="John Doe"
+                      className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                    />
+                  )}
                 />
               </div>
             </FormField>
@@ -289,6 +310,51 @@ export default function UserProfileForm() {
                   />
                   <span className="text-slate-200">Tailwind CSS</span>
                 </label>
+              </div>
+            </FormField>
+
+            <FormField
+              label="Phone Number"
+              error={errors.phoneNumbers?.root?.message}
+            >
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <FormField
+                    key={field.id}
+                    label=""
+                    error={errors.phoneNumbers?.[index]?.number?.message}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        {...register(`phoneNumbers.${index}.number`, {
+                          required: "Phone number is required",
+                        })}
+                        placeholder="Phone Number"
+                        className="flex bg-slate-950/60 border border-slate-700 rounded-xl py-3 px-4 text-slate-100
+                            outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </FormField>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    append({
+                      number: "",
+                    })
+                  }
+                  className="w-full rounded-xl border border-dashed border-rose-400 text-rose-400 py-3 hover:bg-rose-400/10"
+                >
+                  + Add Phone Number
+                </button>
               </div>
             </FormField>
 
