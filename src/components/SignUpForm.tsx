@@ -12,22 +12,70 @@ import {
 } from "lucide-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import FormField from "./FormField";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface UserProfileFormData {
-  name: string;
-  email: string;
-  password: string;
-  age: number;
-  country: string;
-  gender: string;
-  maritalStatus: string;
-  skills: string[];
-  biography: string;
-  terms: boolean;
-  phoneNumbers: {
-    number: string;
-  }[];
-}
+const userProfileSchema = z.object({
+  name: z
+    .string()
+    .min(5, "Name must be at least 5 characters")
+    .max(10, "Name must be less then 20 characters"),
+  email: z.email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .refine((value) => !value.includes(" "), {
+      message: "Password must not contain spaces",
+    }),
+  age: z.preprocess(
+    (value) => {
+      if (value === "" || value === undefined || Number.isNaN(value)) {
+        return undefined;
+      }
+
+      return value;
+    },
+    z
+      .number({
+        error: "Age is required",
+      })
+      .min(18, "You must be at least 18 years old")
+      .max(100, "Age is not valid"),
+  ),
+  country: z.string().min(1, "Please select a country"),
+  gender: z.string().min(1, "Please select a gender"),
+  skills: z.array(z.string()).min(1, "Select at least one skill"),
+  biography: z.string().min(20, "Biography must be at least 20 characters"),
+  terms: z.literal(true, {
+    error: "You must accept the terms",
+  }),
+  phoneNumbers: z
+    .array(
+      z.object({
+        number: z.string().min(1, "Phone number is required"),
+      }),
+    )
+    .min(1, "At least one phone number is required"),
+  maritalStatus: z.string().min(1, "Please select a maritalStatus"),
+});
+
+// interface UserProfileFormData {
+//   name: string;
+//   email: string;
+//   password: string;
+//   age: number;
+//   country: string;
+//   gender: string;
+//   maritalStatus: string;
+//   skills: string[];
+//   biography: string;
+//   terms: boolean;
+//   phoneNumbers: {
+//     number: string;
+//   }[];
+// }
+
+type UserProfileFormData = z.infer<typeof userProfileSchema>;
 
 export default function UserProfileForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -39,15 +87,25 @@ export default function UserProfileForm() {
     watch,
     control,
   } = useForm<UserProfileFormData>({
-    defaultValues: { phoneNumbers: [{ number: "" }] },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      age: undefined,
+      country: "",
+      gender: "",
+      maritalStatus: "",
+      skills: [],
+      biography: "",
+      terms: true,
+      phoneNumbers: [{ number: "" }],
+    },
+    resolver: zodResolver(userProfileSchema),
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "phoneNumbers",
-    rules: {
-      required: "At least one phone number is required",
-    },
   });
 
   const onSubmit = (data: UserProfileFormData) => {
@@ -91,12 +149,12 @@ export default function UserProfileForm() {
                 <Controller
                   name="name"
                   control={control}
-                  render={({field}) => (
+                  render={({ field }) => (
                     <input
                       type="text"
                       {...field}
                       onChange={(e) => {
-                        field.onChange(e.target.value.toUpperCase())
+                        field.onChange(e.target.value.toUpperCase());
                       }}
                       placeholder="John Doe"
                       className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
@@ -112,12 +170,7 @@ export default function UserProfileForm() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="email"
-                  {...register("email", {
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Please enter a valid email",
-                    },
-                  })}
+                  {...register("email")}
                   placeholder="john@example.com"
                   className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                 />
@@ -130,12 +183,7 @@ export default function UserProfileForm() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  {...register("password", {
-                    minLength: {
-                      value: 8,
-                      message: "Enter at least 8 characters",
-                    },
-                  })}
+                  {...register("password")}
                   placeholder="Enter your password"
                   className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 pr-11"
                 />
@@ -159,10 +207,7 @@ export default function UserProfileForm() {
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="number"
-                  {...register("age", {
-                    valueAsNumber: true,
-                    required: "Age is required",
-                  })}
+                  {...register("age", { valueAsNumber: true })}
                   placeholder="25"
                   className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                 />
@@ -174,9 +219,7 @@ export default function UserProfileForm() {
               <div className="relative">
                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
                 <select
-                  {...register("country", {
-                    required: "Please select a country.",
-                  })}
+                  {...register("country")}
                   defaultValue=""
                   className="w-full appearance-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                 >
@@ -214,9 +257,7 @@ export default function UserProfileForm() {
                   <input
                     type="radio"
                     value="male"
-                    {...register("gender", {
-                      required: "Please select a gender.",
-                    })}
+                    {...register("gender")}
                     className="accent-rose-400"
                   />
                   <span className="text-slate-200">Male</span>
@@ -243,9 +284,7 @@ export default function UserProfileForm() {
                     <input
                       type="radio"
                       value="married"
-                      {...register("maritalStatus", {
-                        required: "Please select a maritalStatus.",
-                      })}
+                      {...register("maritalStatus")}
                       className="accent-rose-400"
                     />
                     <span className="text-slate-200">Married</span>
@@ -271,11 +310,7 @@ export default function UserProfileForm() {
                   <input
                     type="checkbox"
                     value="react"
-                    {...register("skills", {
-                      validate: (value) =>
-                        (value && value.length > 0) ||
-                        "Select at least one skill.",
-                    })}
+                    {...register("skills")}
                     className="accent-rose-400"
                   />
                   <span className="text-slate-200">React</span>
@@ -326,9 +361,7 @@ export default function UserProfileForm() {
                   >
                     <div className="flex items-center gap-2">
                       <input
-                        {...register(`phoneNumbers.${index}.number`, {
-                          required: "Phone number is required",
-                        })}
+                        {...register(`phoneNumbers.${index}.number`)}
                         placeholder="Phone Number"
                         className="flex bg-slate-950/60 border border-slate-700 rounded-xl py-3 px-4 text-slate-100
                             outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
@@ -376,7 +409,7 @@ export default function UserProfileForm() {
               <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
                 <input
                   type="checkbox"
-                  {...register("terms", { required: "Term is required" })}
+                  {...register("terms")}
                   className="mt-1 accent-rose-400"
                 />
                 <p className="text-sm text-slate-300 leading-6">
