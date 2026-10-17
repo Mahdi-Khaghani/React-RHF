@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import FormField from "./FormField";
-import z from "zod";
+import z, { promise } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const userProfileSchema = z.object({
@@ -83,7 +83,7 @@ export default function UserProfileForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors,isSubmitting },
     watch,
     reset,
     control,
@@ -109,10 +109,19 @@ export default function UserProfileForm() {
     name: "phoneNumbers",
   });
 
-  const onSubmit = (data: UserProfileFormData) => {
-    console.log(data);
+  const saveUser = (data : UserProfileFormData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(data)
+      },2000)
+    })
+  }
+
+  const onSubmit = async (data: UserProfileFormData) => {
+   await saveUser(data)
   };
 
+  console.log(isSubmitting)
   const loadUser = async () => {
     const response = await fetch("/user.json");
     const data = await response.json();
@@ -439,10 +448,10 @@ export default function UserProfileForm() {
             {/* Submit */}
 
             <button
-              disabled={!terms}
+              disabled={!terms || isSubmitting}
               type="submit"
               className={`w-full mt-2 bg-linear-to-r from-rose-400 to-amber-300 text-slate-900 font-semibold text-sm rounded-xl py-3 flex items-center justify-center gap-2 transition hover:brightness-105 active:scale-[0.98]
-                ${!terms && "opacity-50 pointer-events-none"}`}
+                ${(!terms || isSubmitting) && "opacity-50 pointer-events-none"}`}
             >
               Create Profile
               <ArrowRight className="w-4 h-4" />
