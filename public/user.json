@@ -1,0 +1,20 @@
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "12345678",
+  "age": 29,
+  "country": "United States",
+  "gender": "male",
+  "maritalStatus" : "single",
+  "skills": ["react", "typescript"],
+  "biography": "Frontend developer with over 5 years of experience",
+  "terms": true,
+  "phoneNumbers": [
+    {
+      "number": "091200000000"
+    },
+    {
+      "number": "091351111111"
+    }
+  ]
+}

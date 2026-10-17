@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -85,6 +85,7 @@ export default function UserProfileForm() {
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
     control,
   } = useForm<UserProfileFormData>({
     defaultValues: {
@@ -111,6 +112,15 @@ export default function UserProfileForm() {
   const onSubmit = (data: UserProfileFormData) => {
     console.log(data);
   };
+
+  const loadUser = async () => {
+    const response = await fetch("/user.json");
+    const data = await response.json();
+    reset(data)
+  };
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   const terms = watch("terms");
   const maritalStatus = watch("gender");
