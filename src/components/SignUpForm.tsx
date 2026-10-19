@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import FormField from "./FormField";
-import z, { promise } from "zod";
+import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const userProfileSchema = z.object({
@@ -87,6 +87,11 @@ export default function UserProfileForm() {
     watch,
     reset,
     control,
+    // setValue
+    // getValues
+    // trigger
+    // clearErrors
+    setError
   } = useForm<UserProfileFormData>({
     defaultValues: {
       name: "",
@@ -150,6 +155,15 @@ export default function UserProfileForm() {
             <p className="text-slate-500 text-sm">Complete your profile</p>
           </div>
         </div>
+
+        <button className={`w-full mt-2 bg-linear-to-r from-sky-400 to-amber-300 text-slate-900 font-semibold py-2
+          text-sm rounded-xl px-3 flex items-center justify-center gap-2 transition hover:brightness-105 active:scale-[0.98] mb-4`}
+          onClick={() => {
+            console.log(setError("name",{message : "Test Error"}))
+          }}
+          >
+              Clilk me
+        </button>
 
         {/* Card */}
         <div className="relative bg-slate-900/70 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-black/40">
