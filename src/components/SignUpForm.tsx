@@ -1,19 +1,11 @@
-import { useEffect, useState } from "react";
-import {
-  User,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Calendar,
-  Globe,
-  FileText,
-  ArrowRight,
-} from "lucide-react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { Calendar, Globe, FileText } from "lucide-react";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import FormField from "./FormField";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import PersonalField from "./PersonalField";
+import SubmitSection from "./SubmitSection";
 
 const userProfileSchema = z.object({
   name: z
@@ -75,24 +67,10 @@ const userProfileSchema = z.object({
 //   }[];
 // }
 
-type UserProfileFormData = z.infer<typeof userProfileSchema>;
+export type UserProfileFormData = z.infer<typeof userProfileSchema>;
 
 export default function UserProfileForm() {
-  const [showPassword, setShowPassword] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors,isSubmitting },
-    watch,
-    reset,
-    control,
-    // setValue
-    // getValues
-    // trigger
-    // clearErrors
-    setError
-  } = useForm<UserProfileFormData>({
+  const methods = useForm<UserProfileFormData>({
     defaultValues: {
       name: "",
       email: "",
@@ -109,34 +87,47 @@ export default function UserProfileForm() {
     resolver: zodResolver(userProfileSchema),
   });
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    reset,
+    control,
+    // setValue
+    // getValues
+    // trigger
+    // clearErrors
+    setError,
+  } = methods;
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "phoneNumbers",
   });
 
-  const saveUser = (data : UserProfileFormData) => {
+  const saveUser = (data: UserProfileFormData) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(data)
-      },2000)
-    })
-  }
-
-  const onSubmit = async (data: UserProfileFormData) => {
-   await saveUser(data)
+        resolve(data);
+      }, 2000);
+    });
   };
 
-  console.log(isSubmitting)
+  const onSubmit = async (data: UserProfileFormData) => {
+    await saveUser(data);
+  };
+
+  console.log(isSubmitting);
   const loadUser = async () => {
     const response = await fetch("/user.json");
     const data = await response.json();
-    reset(data)
+    reset(data);
   };
   useEffect(() => {
     loadUser();
   }, []);
 
-  const terms = watch("terms");
   const maritalStatus = watch("gender");
 
   return (
@@ -156,13 +147,14 @@ export default function UserProfileForm() {
           </div>
         </div>
 
-        <button className={`w-full mt-2 bg-linear-to-r from-sky-400 to-amber-300 text-slate-900 font-semibold py-2
+        <button
+          className={`w-full mt-2 bg-linear-to-r from-sky-400 to-amber-300 text-slate-900 font-semibold py-2
           text-sm rounded-xl px-3 flex items-center justify-center gap-2 transition hover:brightness-105 active:scale-[0.98] mb-4`}
           onClick={() => {
-            console.log(setError("name",{message : "Test Error"}))
+            console.log(setError("name", { message: "Test Error" }));
           }}
-          >
-              Clilk me
+        >
+          Clilk me
         </button>
 
         {/* Card */}
@@ -174,103 +166,47 @@ export default function UserProfileForm() {
             Fill in your information to complete your profile.
           </p>
 
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {/* Full Name */}
-            <FormField label="Full Name" error={errors.name?.message}>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      type="text"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e.target.value.toUpperCase());
-                      }}
-                      placeholder="John Doe"
-                      className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                    />
-                  )}
-                />
-              </div>
-            </FormField>
+          <FormProvider {...methods}>
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              <PersonalField />
 
-            {/* Email */}
-            <FormField label="Email" error={errors.email?.message}>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="email"
-                  {...register("email")}
-                  placeholder="john@example.com"
-                  className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                />
-              </div>
-            </FormField>
+              {/* Age */}
+              <FormField label="Age" error={errors.age?.message}>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <input
+                    type="number"
+                    {...register("age", { valueAsNumber: true })}
+                    placeholder="25"
+                    className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                  />
+                </div>
+              </FormField>
 
-            {/* Password */}
-            <FormField label="Password" error={errors.password?.message}>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  {...register("password")}
-                  placeholder="Enter your password"
-                  className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 pr-11"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </FormField>
+              {/* Country */}
+              <FormField label="Country" error={errors.country?.message}>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
+                  <select
+                    {...register("country")}
+                    defaultValue=""
+                    className="w-full appearance-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                  >
+                    <option value="" disabled>
+                      Select a country
+                    </option>
+                    <option>United States</option>
+                    <option>Canada</option>
+                    <option>Germany</option>
+                    <option>France</option>
+                    <option>United Kingdom</option>
+                    <option>Australia</option>
+                    <option>Japan</option>
+                  </select>
+                </div>
+              </FormField>
 
-            {/* Age */}
-            <FormField label="Age" error={errors.age?.message}>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="number"
-                  {...register("age", { valueAsNumber: true })}
-                  placeholder="25"
-                  className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                />
-              </div>
-            </FormField>
-
-            {/* Country */}
-            <FormField label="Country" error={errors.country?.message}>
-              <div className="relative">
-                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
-                <select
-                  {...register("country")}
-                  defaultValue=""
-                  className="w-full appearance-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                >
-                  <option value="" disabled>
-                    Select a country
-                  </option>
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Germany</option>
-                  <option>France</option>
-                  <option>United Kingdom</option>
-                  <option>Australia</option>
-                  <option>Japan</option>
-                </select>
-              </div>
-            </FormField>
-
-            {/* <FormField label="State">
+              {/* <FormField label="State">
                             <select
                                 className="w-full appearance-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 px-4 text-slate-100 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                             >
@@ -283,194 +219,162 @@ export default function UserProfileForm() {
                             </select>
                         </FormField> */}
 
-            {/* Gender */}
-            <FormField label="Gender" error={errors.gender?.message}>
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="radio"
-                    value="male"
-                    {...register("gender")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">Male</span>
-                </label>
-
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="radio"
-                    value="female"
-                    {...register("gender")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">Female</span>
-                </label>
-              </div>
-            </FormField>
-            {maritalStatus === "male" ? (
-              <FormField
-                label="maritalStatus"
-                error={errors.maritalStatus?.message}
-              >
+              {/* Gender */}
+              <FormField label="Gender" error={errors.gender?.message}>
                 <div className="grid grid-cols-2 gap-4">
                   <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
                     <input
                       type="radio"
-                      value="married"
-                      {...register("maritalStatus")}
+                      value="male"
+                      {...register("gender")}
                       className="accent-rose-400"
                     />
-                    <span className="text-slate-200">Married</span>
+                    <span className="text-slate-200">Male</span>
                   </label>
 
                   <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
                     <input
                       type="radio"
-                      value="single"
-                      {...register("maritalStatus")}
+                      value="female"
+                      {...register("gender")}
                       className="accent-rose-400"
                     />
-                    <span className="text-slate-200">single</span>
+                    <span className="text-slate-200">Female</span>
                   </label>
                 </div>
               </FormField>
-            ) : null}
-
-            {/* Skills */}
-            <FormField label="Skills" error={errors.skills?.message}>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="checkbox"
-                    value="react"
-                    {...register("skills")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">React</span>
-                </label>
-
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="checkbox"
-                    value="nextjs"
-                    {...register("skills")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">Next.js</span>
-                </label>
-
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="checkbox"
-                    value="typescript"
-                    {...register("skills")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">TypeScript</span>
-                </label>
-
-                <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
-                  <input
-                    type="checkbox"
-                    value="tailwind"
-                    {...register("skills")}
-                    className="accent-rose-400"
-                  />
-                  <span className="text-slate-200">Tailwind CSS</span>
-                </label>
-              </div>
-            </FormField>
-
-            <FormField
-              label="Phone Number"
-              error={errors.phoneNumbers?.root?.message}
-            >
-              <div className="space-y-3">
-                {fields.map((field, index) => (
-                  <FormField
-                    key={field.id}
-                    label=""
-                    error={errors.phoneNumbers?.[index]?.number?.message}
-                  >
-                    <div className="flex items-center gap-2">
-                      <input
-                        {...register(`phoneNumbers.${index}.number`)}
-                        placeholder="Phone Number"
-                        className="flex bg-slate-950/60 border border-slate-700 rounded-xl py-3 px-4 text-slate-100
-                            outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => remove(index)}
-                        className="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </FormField>
-                ))}
-                <button
-                  type="button"
-                  onClick={() =>
-                    append({
-                      number: "",
-                    })
-                  }
-                  className="w-full rounded-xl border border-dashed border-rose-400 text-rose-400 py-3 hover:bg-rose-400/10"
+              {maritalStatus === "male" ? (
+                <FormField
+                  label="maritalStatus"
+                  error={errors.maritalStatus?.message}
                 >
-                  + Add Phone Number
-                </button>
-              </div>
-            </FormField>
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                      <input
+                        type="radio"
+                        value="married"
+                        {...register("maritalStatus")}
+                        className="accent-rose-400"
+                      />
+                      <span className="text-slate-200">Married</span>
+                    </label>
 
-            {/* Biography */}
-            <FormField label="Biography" error={errors.biography?.message}>
-              <div className="relative">
-                <FileText className="absolute left-3 top-4 w-5 h-5 text-slate-500" />
-                <textarea
-                  rows={5}
-                  {...register("biography")}
-                  placeholder="Tell us a little about yourself..."
-                  className="w-full resize-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
-                />
-              </div>
-            </FormField>
+                    <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                      <input
+                        type="radio"
+                        value="single"
+                        {...register("maritalStatus")}
+                        className="accent-rose-400"
+                      />
+                      <span className="text-slate-200">single</span>
+                    </label>
+                  </div>
+                </FormField>
+              ) : null}
 
-            {/* Accept Terms */}
-            <FormField label="" error={errors.terms?.message}>
-              <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                <input
-                  type="checkbox"
-                  {...register("terms")}
-                  className="mt-1 accent-rose-400"
-                />
-                <p className="text-sm text-slate-300 leading-6">
-                  I agree to the{" "}
-                  <span className="text-rose-400 cursor-pointer hover:text-rose-300">
-                    Terms of Service
-                  </span>{" "}
-                  and{" "}
-                  <span className="text-rose-400 cursor-pointer hover:text-rose-300">
-                    Privacy Policy
-                  </span>
-                  .
-                </p>
-              </div>
-            </FormField>
+              {/* Skills */}
+              <FormField label="Skills" error={errors.skills?.message}>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="checkbox"
+                      value="react"
+                      {...register("skills")}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">React</span>
+                  </label>
 
-            {/* Submit */}
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="checkbox"
+                      value="nextjs"
+                      {...register("skills")}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">Next.js</span>
+                  </label>
 
-            <button
-              disabled={!terms || isSubmitting}
-              type="submit"
-              className={`w-full mt-2 bg-linear-to-r from-rose-400 to-amber-300 text-slate-900 font-semibold text-sm rounded-xl py-3 flex items-center justify-center gap-2 transition hover:brightness-105 active:scale-[0.98]
-                ${(!terms || isSubmitting) && "opacity-50 pointer-events-none"}`}
-            >
-              Create Profile
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="checkbox"
+                      value="typescript"
+                      {...register("skills")}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">TypeScript</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
+                    <input
+                      type="checkbox"
+                      value="tailwind"
+                      {...register("skills")}
+                      className="accent-rose-400"
+                    />
+                    <span className="text-slate-200">Tailwind CSS</span>
+                  </label>
+                </div>
+              </FormField>
+
+              <FormField
+                label="Phone Number"
+                error={errors.phoneNumbers?.root?.message}
+              >
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <FormField
+                      key={field.id}
+                      label=""
+                      error={errors.phoneNumbers?.[index]?.number?.message}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          {...register(`phoneNumbers.${index}.number`)}
+                          placeholder="Phone Number"
+                          className="flex bg-slate-950/60 border border-slate-700 rounded-xl py-3 px-4 text-slate-100
+                            outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </FormField>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      append({
+                        number: "",
+                      })
+                    }
+                    className="w-full rounded-xl border border-dashed border-rose-400 text-rose-400 py-3 hover:bg-rose-400/10"
+                  >
+                    + Add Phone Number
+                  </button>
+                </div>
+              </FormField>
+
+              {/* Biography */}
+              <FormField label="Biography" error={errors.biography?.message}>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-4 w-5 h-5 text-slate-500" />
+                  <textarea
+                    rows={5}
+                    {...register("biography")}
+                    placeholder="Tell us a little about yourself..."
+                    className="w-full resize-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
+                  />
+                </div>
+              </FormField>
+              <SubmitSection />
+            </form>
+          </FormProvider>
 
           <div className="mt-8 border-t border-slate-800 pt-6">
             <p className="text-center text-sm text-slate-500">
