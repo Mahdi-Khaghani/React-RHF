@@ -3,6 +3,7 @@ import FormField from "./FormField";
 import { Controller, useFormContext } from "react-hook-form";
 import type { UserProfileFormData } from "./SignUpForm";
 import { useState } from "react";
+import TextInput from "../form/TextInput";
 
 const PersonalField = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +54,27 @@ const PersonalField = () => {
       </FormField>
 
       {/* Password */}
-      <FormField label="Password" error={errors.password?.message}>
+      <TextInput
+        label="Password"
+        error={errors.password?.message}
+        icon={<Lock className="w-5 h-5" />}
+        placeholder="Enter your password"
+        registration={register("password")}
+        additionalElement={
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
+          </button>
+        }
+      />
+      {/* <FormField label="Password" error={errors.password?.message}>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
@@ -74,7 +95,7 @@ const PersonalField = () => {
             )}
           </button>
         </div>
-      </FormField>
+      </FormField> */}
     </>
   );
 };

@@ -6,6 +6,11 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import PersonalField from "./PersonalField";
 import SubmitSection from "./SubmitSection";
+import TextInput from "../form/TextInput";
+import Select from "../form/Select";
+import RadioGroup from "../form/RadioGroup";
+import CheckboxGroup from "../form/CheckboxGroup";
+import Textarea from "../form/Textarea";
 
 const userProfileSchema = z.object({
   name: z
@@ -171,9 +176,16 @@ export default function UserProfileForm() {
               <PersonalField />
 
               {/* Age */}
-              <FormField label="Age" error={errors.age?.message}>
+              <TextInput
+                label="age"
+                type="number"
+                placeholder="25"
+                icon={<Calendar className="w-5 h-5" />}
+                error={errors.age?.message}
+                registration={register("age", { valueAsNumber: true })}
+              />
+              {/* <FormField label="Age" error={errors.age?.message}>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <input
                     type="number"
                     {...register("age", { valueAsNumber: true })}
@@ -181,10 +193,23 @@ export default function UserProfileForm() {
                     className="w-full bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                   />
                 </div>
-              </FormField>
+              </FormField> */}
 
               {/* Country */}
-              <FormField label="Country" error={errors.country?.message}>
+              <Select
+                label="Country"
+                error={errors.country?.message}
+                icon={<Globe className="w-5 h-5" />}
+                registration={register("country")}
+                options={[
+                  { label: "United States", value: "United States" },
+                  { label: "Canada", value: "Canada" },
+                  { label: "Germany", value: "Germany" },
+                  { label: "Iran", value: "Iran" },
+                  { label: "Japan", value: "Japan" },
+                ]}
+              />
+              {/* <FormField label="Country" error={errors.country?.message}>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
                   <select
@@ -204,7 +229,7 @@ export default function UserProfileForm() {
                     <option>Japan</option>
                   </select>
                 </div>
-              </FormField>
+              </FormField> */}
 
               {/* <FormField label="State">
                             <select
@@ -220,7 +245,16 @@ export default function UserProfileForm() {
                         </FormField> */}
 
               {/* Gender */}
-              <FormField label="Gender" error={errors.gender?.message}>
+              <RadioGroup
+                label="Gender"
+                error={errors.gender?.message}
+                registration={register("gender")}
+                options={[
+                  { label: "Male", value: "male" },
+                  { label: "Female", value: "female" },
+                ]}
+              />
+              {/* <FormField label="Gender" error={errors.gender?.message}>
                 <div className="grid grid-cols-2 gap-4">
                   <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
                     <input
@@ -242,7 +276,7 @@ export default function UserProfileForm() {
                     <span className="text-slate-200">Female</span>
                   </label>
                 </div>
-              </FormField>
+              </FormField> */}
               {maritalStatus === "male" ? (
                 <FormField
                   label="maritalStatus"
@@ -273,7 +307,17 @@ export default function UserProfileForm() {
               ) : null}
 
               {/* Skills */}
-              <FormField label="Skills" error={errors.skills?.message}>
+              <CheckboxGroup
+                label="Skills"
+                error={errors.skills?.message}
+                registration={register("skills")}
+                options={[
+                  { label: "nextjs", value: "nextjs" },
+                  { label: "tailwind", value: "tailwind" },
+                  { label: "typescript", value: "typescript" },
+                ]}
+              />
+              {/* <FormField label="Skills" error={errors.skills?.message}>
                 <div className="grid grid-cols-2 gap-3">
                   <label className="flex items-center gap-3 bg-slate-950/60 border border-slate-700 rounded-xl px-4 py-3 cursor-pointer hover:border-rose-400 transition">
                     <input
@@ -315,7 +359,7 @@ export default function UserProfileForm() {
                     <span className="text-slate-200">Tailwind CSS</span>
                   </label>
                 </div>
-              </FormField>
+              </FormField> */}
 
               <FormField
                 label="Phone Number"
@@ -361,7 +405,14 @@ export default function UserProfileForm() {
               </FormField>
 
               {/* Biography */}
-              <FormField label="Biography" error={errors.biography?.message}>
+              <Textarea
+                label="Biography"
+                error={errors.biography?.message}
+                icon={<FileText className="w-5 h-5" />}
+                placeholder="Tell us a little about yourself..."
+                registration={register("biography")}
+              />
+              {/* <FormField label="Biography" error={errors.biography?.message}>
                 <div className="relative">
                   <FileText className="absolute left-3 top-4 w-5 h-5 text-slate-500" />
                   <textarea
@@ -371,7 +422,7 @@ export default function UserProfileForm() {
                     className="w-full resize-none bg-slate-950/60 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"
                   />
                 </div>
-              </FormField>
+              </FormField> */}
               <SubmitSection />
             </form>
           </FormProvider>
